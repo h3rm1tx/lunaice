@@ -32,6 +32,8 @@ dependencies = [
     "xarray>=2024.0",
     "zarr>=2.17",
     "pyyaml>=6.0",
+    "dask[array]>=2024.0",
+    "pyproj>=3.6",
 ]
 
 [project.optional-dependencies]

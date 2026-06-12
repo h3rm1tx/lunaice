@@ -1,0 +1,35 @@
+cube:
+  cube_path: "polaris_cube.zarr"
+  chunk_size: 256
+  pyramid_levels: 5
+  overwrite: false
+  logging_level: "INFO"
+  include_dfsar: true
+  include_ohrc: true
+  include_lola: true
+  include_illumination: true
+
+  grid:
+    projection: "polar_stereographic"
+    crs_proj4: "+proj=stere +lat_0=-90 +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=1737400 +b=1737400 +units=m +no_defs"
+    crs_epsg: "MOON_ME"
+    pixel_size_m: 20.0
+    bounds_left: -50000.0
+    bounds_right: 50000.0
+    bounds_bottom: -50000.0
+    bounds_top: 50000.0
+    reference_body_radius: 1737400.0
+
+  sources:
+    dfsar_path: "/data/dfsar/processed/"
+    ohrc_path: "/data/ohrc/mosaic.tif"
+    lola_dem_path: "/data/lola/LDEM_80S_20MPP_ADJ.TIF"
+    lola_slope_path: "/data/lola/LSLOPE_80S_20MPP.TIF"
+    illumination_dir: "/data/illumination/"
+    crater_catalog: "configs/craters.csv"
+
+  processing:
+    output_dtype: "float32"
+    clip_percentile: 99.5
+    zarr_compressor: "blosc"
+    geotiff_compress: "LZW"
