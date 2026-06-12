@@ -87,8 +87,7 @@ class LabelingEngine:
     def _blank(self, h: int, w: int) -> np.ndarray:
         return np.full((h, w), np.nan, dtype=np.float32)
 
-    def _compute_all_lfs(self, v: dict) -> dict[str, LabelSource]:
-        h, w = v.get("_h", 1), v.get("_w", 1)
+    def _compute_all_lfs(self, v: dict, h: int = 1, w: int = 1) -> dict[str, LabelSource]:
         blank = self._blank(h, w)
 
         cpr_l = v.get("cpr", blank.copy())
@@ -290,7 +289,7 @@ class LabelingEngine:
         lon = v.get("lon", self._blank(h, w))
         lat = v.get("lat", self._blank(h, w))
 
-        sources = self._compute_all_lfs(v)
+        sources = self._compute_all_lfs(v, h=h, w=w)
 
         fused = self._fuse(sources)
 
