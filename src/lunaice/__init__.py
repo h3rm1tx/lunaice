@@ -12,6 +12,7 @@ from lunaice.cube import (
     CraterCatalog,
     CraterRecord,
 )
+from lunaice.ice import IcePriorConfig, IcePriorEngine
 
 __all__ = [
     "__version__",
@@ -28,4 +29,6 @@ __all__ = [
     "CraterQuery",
     "CraterCatalog",
     "CraterRecord",
+    "IcePriorConfig",
+    "IcePriorEngine",
 ]

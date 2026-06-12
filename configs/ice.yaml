@@ -1,0 +1,26 @@
+ice_prior:
+  cube_path: "polaris_cube.zarr"
+  output_dir: "ice_products"
+  cpr_threshold: 1.0
+  dop_threshold: 0.3
+  roughness_percentile: 30.0
+  overwrite: false
+  logging_level: "INFO"
+  generate_plots: true
+  generate_report: true
+
+  weights:
+    cpr: 0.25
+    dop: 0.15
+    psr: 0.20
+    roughness: 0.10
+    multi_frequency: 0.15
+    scattering: 0.15
+
+  thresholds:
+    surface_alpha_max: 42.5
+    volume_alpha_min: 37.5
+    volume_alpha_max: 52.5
+    dihedral_alpha_min: 47.5
+    entropy_low: 0.5
+    entropy_high: 0.9

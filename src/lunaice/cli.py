@@ -22,6 +22,8 @@ Examples:
   lunaice cube build -c configs/cube.yaml
   lunaice cube info -c polaris_cube.zarr
   lunaice cube query pixel --x 1000 --y -2000 -c polaris_cube.zarr
+  lunaice ice prior -c configs/ice.yaml
+  lunaice ice scatter -c polaris_cube.zarr
         """,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -89,6 +91,18 @@ Examples:
     cube_pyramid.add_argument("--levels", type=int, default=5, help="Number of pyramid levels")
 
     cube_craters_list = cube_sub.add_parser("craters", help="List known craters in catalog")
+
+    # --- ice ---
+    ice = sub.add_parser("ice", help="POLARIS Ice Prior Engine operations")
+    ice_sub = ice.add_subparsers(dest="ice_command", required=True)
+
+    ice_prior = ice_sub.add_parser("prior", help="Run the ice prior engine")
+    ice_prior.add_argument("-c", "--config", required=True, help="Ice engine YAML configuration")
+    ice_prior.add_argument("--overwrite", action="store_true", help="Overwrite existing outputs")
+
+    ice_scatter = ice_sub.add_parser("scatter", help="Classify scattering mechanisms from cube")
+    ice_scatter.add_argument("-c", "--cube", required=True, help="Path to the Zarr cube")
+    ice_scatter.add_argument("-o", "--output", default="scattering_class.tif", help="Output GeoTIFF")
 
     return parser
 
@@ -244,6 +258,49 @@ def cmd_cube(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_ice(args: argparse.Namespace) -> int:
+    if args.ice_command == "prior":
+        from lunaice.ice import IcePriorConfig, IcePriorEngine
+        config = IcePriorConfig.from_yaml(args.config)
+        if args.overwrite:
+            config.overwrite = True
+        engine = IcePriorEngine(config)
+        result = engine.run()
+        print(json.dumps({
+            "status": "success",
+            "output_dir": config.output_dir,
+            "elapsed_s": round(result["elapsed_s"], 2),
+            "mean_ice_prior": round(float(np.nanmean(result["ice_prior"])), 4),
+            "max_ice_prior": round(float(np.nanmax(result["ice_prior"])), 4),
+            "candidate_regions": len(result["candidate_gdf"]) if not result["candidate_gdf"].empty else 0,
+        }, indent=2))
+        return 0
+
+    elif args.ice_command == "scatter":
+        from lunaice.cube import CubeConfig, PolarisDataCube
+        from lunaice.ice.classification.cloude_pottier import CloudePottierClassifier
+        cfg = CubeConfig(cube_path=args.cube)
+        cube = PolarisDataCube(cfg)
+        ds = cube.ds
+        entropy = ds["entropy"].compute().values if "entropy" in ds else None
+        alpha = ds["alpha_deg"].compute().values if "alpha_deg" in ds else None
+        if entropy is None or alpha is None:
+            print("Error: cube must contain 'entropy' and 'alpha_deg'")
+            return 1
+        classifier = CloudePottierClassifier()
+        sc = classifier.classify(entropy, alpha)
+        import rasterio
+        profile = {"driver": "GTiff", "height": sc.shape[0], "width": sc.shape[1],
+                   "count": 1, "dtype": "int16", "compress": "LZW"}
+        with rasterio.open(args.output, "w", **profile) as dst:
+            dst.write(sc.astype(np.int16), 1)
+        print(f"Saved scattering class map to {args.output}")
+        cube.close()
+        return 0
+
+    return 1
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -251,6 +308,8 @@ def main() -> int:
         return cmd_process(args)
     elif args.command == "cube":
         return cmd_cube(args)
+    elif args.command == "ice":
+        return cmd_ice(args)
     parser.print_help()
     return 1
 
