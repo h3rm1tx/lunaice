@@ -10,6 +10,8 @@ build/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+coverage/
 *.tfrecords
 *.zarr/
 output/
@@ -25,3 +27,4 @@ thumbs.db
 *.swp
 *.swo
 *~
+session-*.md
