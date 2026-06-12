@@ -1,0 +1,31 @@
+input_file: "/data/dfsar/L1A/L_band_slc.h5"
+output_dir: "/data/dfsar/processed/"
+band: "L"
+logging_level: "INFO"
+verbose: true
+overwrite: false
+
+processing:
+  radiometric_calibration: true
+  polarimetric_calibration: true
+
+  speckle_filter:
+    method: "refined_lee"
+    window_size: 7
+    damping_factor: 1.0
+    n_looks: 4
+
+  multilook_range: 2
+  multilook_azimuth: 2
+
+  generate_coherency_matrix: true
+  generate_cloude_pottier: true
+  generate_cpr: true
+  generate_dop: true
+  generate_backscatter: true
+
+  output_dtype: "float32"
+  clip_percentile: 99.5
+  zarr_compressor: "blosc"
+  zarr_chunks: [256, 256]
+  geotiff_compress: "LZW"

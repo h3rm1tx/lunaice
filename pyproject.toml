@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lunaice"
+version = "0.1.0"
+description = "Lunar Subsurface Ice Detection using Chandrayaan-2 DFSAR Polarimetric Data"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "LUNAICE Team"},
+]
+keywords = [
+    "chandrayaan-2", "dfsar", "polsar", "polarimetry",
+    "lunar", "radar", "remote-sensing", "ice-detection",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.12",
+    "rasterio>=1.3",
+    "xarray>=2024.0",
+    "zarr>=2.17",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.1",
+    "mypy>=1.8",
+    "pre-commit>=3.5",
+]
+viz = [
+    "matplotlib>=3.8",
+    "cartopy>=0.22",
+]
+all = [
+    "lunaice[dev,viz]",
+]
+
+[project.scripts]
+lunaice = "lunaice.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["lunaice*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+python_files = "test_*.py"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+disallow_untyped_defs = false
