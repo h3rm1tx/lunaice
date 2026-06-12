@@ -1,0 +1,37 @@
+labeling:
+  cube_path: "polaris_cube.zarr"
+  ice_prior_path: ""
+  confidence_path: ""
+  output_dir: "labeling_products"
+  overwrite: false
+  logging_level: "INFO"
+  generate_plots: true
+  generate_report: true
+  use_snorkel_model: true
+  label_fusion_method: "weighted"
+  conflict_threshold: 2
+
+  weights:
+    cpr: 0.20
+    dop: 0.15
+    psr: 0.20
+    multi_frequency: 0.15
+    scattering: 0.10
+    roughness: 0.05
+    illumination: 0.05
+    published_regions: 0.10
+
+  thresholds:
+    cpr_low: 0.8
+    cpr_high: 1.2
+    dop_low: 0.2
+    dop_high: 0.4
+    roughness_low: 2.0
+    roughness_high: 5.0
+    confidence_low: 0.3
+    confidence_high: 0.7
+    ice_prior_possible: 0.3
+    ice_prior_likely: 0.5
+    ice_prior_high: 0.7
+    agreement_threshold: 0.6
+    min_labeling_fraction: 0.3

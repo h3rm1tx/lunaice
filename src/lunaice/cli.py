@@ -104,6 +104,20 @@ Examples:
     ice_scatter.add_argument("-c", "--cube", required=True, help="Path to the Zarr cube")
     ice_scatter.add_argument("-o", "--output", default="scattering_class.tif", help="Output GeoTIFF")
 
+    # --- label ---
+    label = sub.add_parser("label", help="POLARIS Weak Supervision Labeling Engine")
+    label_sub = label.add_subparsers(dest="label_command", required=True)
+
+    label_run = label_sub.add_parser("run", help="Run the labeling engine")
+    label_run.add_argument("-c", "--config", required=True, help="Labeling YAML configuration")
+    label_run.add_argument("--overwrite", action="store_true", help="Overwrite existing outputs")
+    label_run.add_argument("--fusion", choices=["majority", "weighted", "snorkel"],
+                           help="Override label fusion method")
+
+    label_stats = label_sub.add_parser("stats", help="Generate label statistics from existing outputs")
+    label_stats.add_argument("-i", "--input", required=True, help="Path to weak_labels.tif")
+    label_stats.add_argument("-o", "--output", default="label_statistics.html", help="Output HTML path")
+
     return parser
 
 
@@ -301,6 +315,39 @@ def cmd_ice(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_label(args: argparse.Namespace) -> int:
+    if args.label_command == "run":
+        from lunaice.labeling import LabelingConfig, LabelingEngine
+        config = LabelingConfig.from_yaml(args.config)
+        if args.overwrite:
+            config.overwrite = True
+        if args.fusion:
+            config.label_fusion_method = args.fusion
+        engine = LabelingEngine(config)
+        result = engine.run()
+        import json
+        print(json.dumps({
+            "status": "success",
+            "output_dir": config.output_dir,
+            "elapsed_s": round(result["elapsed_s"], 2),
+            "outputs": result["output_paths"],
+        }, indent=2))
+        return 0
+
+    elif args.label_command == "stats":
+        from lunaice.labeling.output.writers import LabelStatisticsReport
+        import rasterio
+        from pathlib import Path
+        with rasterio.open(args.input) as src:
+            labels = src.read(1)
+        report = LabelStatisticsReport(Path(args.output).parent)
+        path = report.generate(labels, np.ones_like(labels, dtype=np.float32))
+        print(f"Saved statistics to {path}")
+        return 0
+
+    return 1
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -310,6 +357,8 @@ def main() -> int:
         return cmd_cube(args)
     elif args.command == "ice":
         return cmd_ice(args)
+    elif args.command == "label":
+        return cmd_label(args)
     parser.print_help()
     return 1
 

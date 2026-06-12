@@ -13,6 +13,7 @@ from lunaice.cube import (
     CraterRecord,
 )
 from lunaice.ice import IcePriorConfig, IcePriorEngine
+from lunaice.labeling import LabelingConfig, LabelingEngine, IceLabel
 
 __all__ = [
     "__version__",
@@ -31,4 +32,7 @@ __all__ = [
     "CraterRecord",
     "IcePriorConfig",
     "IcePriorEngine",
+    "LabelingConfig",
+    "LabelingEngine",
+    "IceLabel",
 ]
